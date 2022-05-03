@@ -16,15 +16,15 @@ import {
   SystemMessage,
 } from "react-native-gifted-chat";
 
-//import firebase
-const firebase = require("firebase");
-require("firebase/firestore");
-
 //import AsyncStorage
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //import NetInfo
 import NetInfo from "@react-native-community/netinfo";
+
+//import firebase
+const firebase = require("firebase");
+require("firebase/firestore");
 
 export default class Chat extends React.Component {
   constructor() {
@@ -93,6 +93,8 @@ export default class Chat extends React.Component {
     }
   }
 
+  /* componentDidMount function gets called after Chat component mounts. State gets set
+with static message to see each element of the UI displayed on screen with setState function */
   componentDidMount() {
     //name to be displayed in status bar at the top of the app
     const name = this.props.route.params.name;
@@ -171,6 +173,7 @@ export default class Chat extends React.Component {
     const message = this.state.messages[0];
 
     this.referenceChatMessages.add({
+      uid: this.state.uid,
       _id: message._id,
       text: message.text,
       createdAt: message.createdAt,
@@ -186,7 +189,7 @@ export default class Chat extends React.Component {
       }),
       () => {
         this.addMessage();
-        this.saveMessage;
+        this.saveMessages();
       }
     );
   }
