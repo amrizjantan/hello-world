@@ -23,8 +23,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 
 //import firebase
-const firebase = require("firebase");
-require("firebase/firestore");
+import * as firebase from "firebase";
+import "firebase/firestore";
+
+//const firebase = require("firebase");
+//require("firebase/firestore");
+
+import CustomActions from "./CustomActions";
+import MapView from "react-native-maps";
 
 export default class Chat extends React.Component {
   constructor() {
@@ -38,6 +44,8 @@ export default class Chat extends React.Component {
         avatar: "",
       },
       isConnected: false,
+      image: null,
+      location: null,
     };
 
     // Firebase configuration
@@ -159,6 +167,8 @@ with static message to see each element of the UI displayed on screen with setSt
           name: data.user.name,
           avatar: data.user.avatar,
         },
+        image: data.image || null,
+        location: data.location || null,
       });
     });
     this.setState({
@@ -175,9 +185,11 @@ with static message to see each element of the UI displayed on screen with setSt
     this.referenceChatMessages.add({
       uid: this.state.uid,
       _id: message._id,
-      text: message.text,
+      text: message.text || "",
       createdAt: message.createdAt,
       user: this.state.user,
+      image: message.image || "",
+      location: message.location || null,
     });
   }
 
@@ -225,6 +237,30 @@ with static message to see each element of the UI displayed on screen with setSt
     }
   }
 
+  //to access CustomActions
+  renderCustomActions = (props) => {
+    return <CustomActions {...props} />;
+  };
+
+  //return a MapView when surrentMessage contains location data
+  renderCustomView(props) {
+    const { currentMessage } = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          style={{ width: 150, height: 100, borderRadius: 13, margin: 3 }}
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        />
+      );
+    }
+    return null;
+  }
+
   render() {
     // color chosen on Start screen to be applied on chat screen
     let bgColor = this.props.route.params.bgColor;
@@ -238,6 +274,8 @@ with static message to see each element of the UI displayed on screen with setSt
           onSend={(messages) => this.onSend(messages)}
           renderBubble={this.renderBubble.bind(this)}
           renderInputToolbar={this.renderInputToolbar.bind(this)}
+          renderActions={this.renderCustomActions}
+          renderCustomView={this.renderCustomView}
           user={{
             _id: this.state.user._id,
             name: this.state.name,
